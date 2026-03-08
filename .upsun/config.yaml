@@ -28,8 +28,6 @@ applications:
           index:
             - index.php
     
-    disk: 2048
-    
     hooks:
       build: |
         set -e
