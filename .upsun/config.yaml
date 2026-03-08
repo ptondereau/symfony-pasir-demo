@@ -1,58 +1,51 @@
-name: 'symfony-demo'
-
-schema:
-  version: 1
-
-type: 'php:8.2'
-
-dependencies:
-  php:
-    composer/composer: '^2'
-  nodejs:
-    nodejs: '^18'
-
-runtime:
-  extensions:
-    - json
-    - mbstring
-
-web:
-  upstream:
-    socket_family: tcp
-    protocol: http
-  commands:
-    start: |
-      PORT=$PORT ./pasir --port $PORT
-  locations:
-    '/':
-      passthru: true
-      root: 'public'
-      index:
-        - index.php
-
-disk: 2048
-
-hooks:
-  build: |
-    set -e
+applications:
+  app:
+    source:
+      root: /
     
-    echo "Installing Symfony dependencies..."
-    composer install --no-dev --optimize-autoloader
+    type: 'php:8.3'
     
-    echo "Downloading Pasir binary for Linux x86_64..."
-    PASIR_VERSION="0.6.0"
-    curl -L -o pasir "https://github.com/el7cosmos/pasir/releases/download/v${PASIR_VERSION}/pasir-Linux-x86_64"
-    chmod +x pasir
+    dependencies:
+      php:
+        composer/composer: '^2'
     
-  deploy: |
-    set -e
-    echo "Deployment complete!"
-
-variables:
-  env:
-    APP_ENV: 'prod'
-
-mounts:
-  '/var':
-    source: tmp
-    source_path: var
+    runtime:
+      extensions:
+        - json
+        - mbstring
+    
+    web:
+      upstream:
+        socket_family: tcp
+        protocol: http
+      commands:
+        start: |
+          PORT=$PORT ./pasir --port $PORT
+      locations:
+        '/':
+          passthru: true
+          root: 'public'
+          index:
+            - index.php
+    
+    disk: 2048
+    
+    hooks:
+      build: |
+        set -e
+        echo "Installing Symfony dependencies..."
+        composer install --no-dev --optimize-autoloader
+        chmod +x pasir
+        
+      deploy: |
+        set -e
+        echo "Deployment complete!"
+    
+    variables:
+      env:
+        APP_ENV: 'prod'
+    
+    mounts:
+      '/var':
+        source: tmp
+        source_path: var
