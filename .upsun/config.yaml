@@ -1,0 +1,68 @@
+name: 'symfony-demo'
+
+schema:
+  version: 1
+
+type: 'php:8.2'
+
+dependencies:
+  php:
+    composer/composer: '^2'
+  nodejs:
+    nodejs: '^18'
+
+runtime:
+  extensions:
+    - json
+    - mbstring
+
+web:
+  upstream:
+    socket_family: tcp
+    protocol: http
+  commands:
+    start: |
+      PORT=$PORT ./pasir --port $PORT
+  locations:
+    '/':
+      passthru: true
+      root: 'public'
+      index:
+        - index.php
+
+disk: 2048
+
+hooks:
+  build: |
+    set -e
+    
+    echo "Installing Symfony dependencies..."
+    composer install --no-dev --optimize-autoloader
+    
+    echo "Downloading Pasir binary..."
+    PASIR_VERSION="0.6.0"
+    curl -L -o pasir "https://github.com/el7cosmos/pasir/releases/download/v${PASIR_VERSION}/pasir-$(uname -s)-$(uname -m)" || {
+      echo "Binary not available, building from source..."
+      # Build from source if binary not available
+      apt-get update && apt-get install -y curl
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      . $HOME/.cargo/env
+      git clone --depth 1 --branch v${PASIR_VERSION} https://github.com/el7cosmos/pasir.git /tmp/pasir
+      cd /tmp/pasir
+      cargo build --release
+      cp target/release/pasir $PLATFORM_APP_DIR/pasir
+    }
+    chmod +x pasir
+    
+  deploy: |
+    set -e
+    echo "Deployment complete!"
+
+variables:
+  env:
+    APP_ENV: 'prod'
+
+mounts:
+  '/var':
+    source: tmp
+    source_path: var

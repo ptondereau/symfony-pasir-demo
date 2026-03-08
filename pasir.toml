@@ -1,0 +1,8 @@
+[[routes]]
+match.uri = '\\.php$'
+serve = "php"
+
+[[routes]]
+match.uri = '.*'
+action.status = 404
+serve = "default"
