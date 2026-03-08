@@ -39,19 +39,9 @@ hooks:
     echo "Installing Symfony dependencies..."
     composer install --no-dev --optimize-autoloader
     
-    echo "Downloading Pasir binary..."
+    echo "Downloading Pasir binary for Linux x86_64..."
     PASIR_VERSION="0.6.0"
-    curl -L -o pasir "https://github.com/el7cosmos/pasir/releases/download/v${PASIR_VERSION}/pasir-$(uname -s)-$(uname -m)" || {
-      echo "Binary not available, building from source..."
-      # Build from source if binary not available
-      apt-get update && apt-get install -y curl
-      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-      . $HOME/.cargo/env
-      git clone --depth 1 --branch v${PASIR_VERSION} https://github.com/el7cosmos/pasir.git /tmp/pasir
-      cd /tmp/pasir
-      cargo build --release
-      cp target/release/pasir $PLATFORM_APP_DIR/pasir
-    }
+    curl -L -o pasir "https://github.com/el7cosmos/pasir/releases/download/v${PASIR_VERSION}/pasir-Linux-x86_64"
     chmod +x pasir
     
   deploy: |
