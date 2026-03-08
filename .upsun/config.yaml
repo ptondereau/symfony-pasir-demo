@@ -19,6 +19,7 @@ applications:
         protocol: http
       commands:
         start: |
+          export LD_LIBRARY_PATH=/app/lib:$LD_LIBRARY_PATH
           PORT=$PORT ./pasir --port $PORT
       locations:
         '/':
@@ -34,6 +35,10 @@ applications:
         composer install --no-dev --optimize-autoloader
         chmod +x pasir
         
+        echo "Setting up PHP library..."
+        mkdir -p lib
+        mv libphp.so lib/ 2>/dev/null || true
+        
       deploy: |
         set -e
         echo "Deployment complete!"
@@ -41,6 +46,7 @@ applications:
     variables:
       env:
         APP_ENV: 'prod'
+        LD_LIBRARY_PATH: '/app/lib'
     
     mounts:
       '/var':
